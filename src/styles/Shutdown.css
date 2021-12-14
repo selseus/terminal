@@ -1,0 +1,9 @@
+.shutdown {
+    flex: 9;
+    display: flex;
+}
+
+.shutdown p {
+    color: blue;
+    font-size: 3em;
+}

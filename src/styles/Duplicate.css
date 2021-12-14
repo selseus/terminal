@@ -1,0 +1,13 @@
+.duplicate-root {
+    flex: 9;
+    display: flex;
+}
+
+.duplicate-root h1 {
+    margin-block: 0em;
+}
+
+.duplicate-root p {
+    margin-block: 0em;
+    font-size: 5em;
+}

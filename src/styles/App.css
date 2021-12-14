@@ -1,0 +1,41 @@
+.App {
+  text-align: center;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+h4 {
+  margin-block: 0em;
+}
+
+h3 {
+  margin-block: 0em;
+}
+
+h2 {
+  margin-block: 0em;
+}
+
+.Header {
+  flex: 2;
+  display: flex;
+}
+
+.Header h1 {
+  font-size: 3em;
+}
+
+.Header h2 {
+  font-size: 2.5em;
+}
+
+.Footer {
+  flex: 1;
+}
+
+.Footer p {
+  color: gray;
+}

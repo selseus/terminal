@@ -1,0 +1,45 @@
+.screensaver {
+    flex: 1;
+}
+
+.screensaver h1 {
+    font-size: 6em;
+    margin-block: 0em;
+}
+
+.screensaver h2 {
+    font-size: 2em;
+}
+
+.wrap {
+    position: relative;
+}
+
+.wrap:before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    opacity: 1;
+    background-image: url('../img/animation.gif');
+    background-repeat: no-repeat;
+    background-position: 50% 0;
+    background-size: cover;
+}
+
+.wrap.faded::before{
+    opacity: 0.3;
+}
+
+.content {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

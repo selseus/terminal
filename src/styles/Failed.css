@@ -1,0 +1,13 @@
+.failed-root {
+    flex: 9;
+    display: flex;
+}
+
+.failed-root h1 {
+    margin-block: 0em;
+}
+
+.failed-root p {
+    margin-block: 0em;
+    font-size: 4em;
+}

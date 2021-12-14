@@ -1,0 +1,16 @@
+.home-root {
+    flex: 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-root h1 {
+    margin-block: 0em;
+    font-size: 3em;
+}
+
+.home-root h2 {
+    color: gray;
+}

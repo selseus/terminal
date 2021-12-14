@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'Baloo';
+  src: local('Baloo'), url(../fonts/Baloo.ttf);
+}
+
+body {
+  margin: 0;
+  font-family: 'Baloo';
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
