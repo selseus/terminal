@@ -1,0 +1,2 @@
+# terminal
+The selseus terminal
