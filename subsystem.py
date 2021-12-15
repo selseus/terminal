@@ -4,7 +4,6 @@ import json, os, time, signal, subprocess
 import RPi.GPIO as GPIO
 from smbus2 import SMBus
 from mlx90614 import MLX90614
-from tests.manual import beep
 
 shutdown = False
 camera = subprocess.Popen("node camera", stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
