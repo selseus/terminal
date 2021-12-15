@@ -15,42 +15,58 @@ import config from './configs';
 require('dotenv').config()
 const dayjs = require('dayjs');
 var CryptoJS = require('crypto-js');
-const sensor = new WebSocket('ws://localhost:8081');
+const subsystem = new WebSocket('ws://localhost:8081');
 const socket = io('https://api.selseus.com', { transports: ['websocket'] });
 
 function App() {
   const isleeping = React.useRef(true);
   const shutdown = React.useRef(false);
+  const scanner = React.useRef(false);
+  const object = React.useRef({});
   let [clock, setClock] = React.useState(dayjs());
   let [screensaver, switch_saver] = React.useState(false);
   let [online, setStatus] = React.useState(false);
   let [screen, setScreen] = React.useState(<Home onTimeout={() => { if (isleeping.current) { switch_saver(true); setScreen(<ScreenSaver />) } }} />);
-  
+
   const set_home = () => {
-    if(!shutdown.current) {
+    if (!shutdown.current) {
       isleeping.current = true;
+      scanner.current = false;
       setScreen(<Home onTimeout={() => { if (isleeping.current) { switch_saver(true); setScreen(<ScreenSaver />) } }} />);
-    }  
+    }
   }
 
   const wakeup = (temp) => {
     switch_saver(false);
     isleeping.current = false;
-    setScreen(<Scanner camera={sensor} socket={socket} object={{ temperature: temp, date: clock.format('MMMM D, YYYY'), time: clock.format('hh:mm a'), object: clock.toISOString(), terminal: config.name }} onTimeout={set_home} />)
+    scanner.current = true;
+    object.current = { temperature: temp, date: clock.format('MMMM D, YYYY'), time: clock.format('hh:mm a'), object: clock.toISOString(), terminal: config.name }
+    setScreen(<Scanner object={object.current} onTimeout={set_home} />)
   };
 
   React.useEffect(() => setInterval(() => setClock(dayjs()), 1000), []);
 
   React.useEffect(() => {
-    sensor.onopen = () => {
-      setInterval(() => { if (isleeping.current) sensor.send(JSON.stringify('temperature')) }, 1000);
+    subsystem.onopen = () => {
+      setInterval(() => {
+        if (isleeping.current) subsystem.send(JSON.stringify('temperature'))
+        else if (scanner.current) subsystem.send(JSON.stringify('code'))
+      }, 5000);
     };
-    sensor.onmessage = (message) => {
-      var temperature = JSON.parse(message.data).temperature;
-      if (temperature >= 35.0 && isleeping.current && socket.connected) wakeup(temperature);
-      if(temperature >= 38.5 && isleeping.current && socket.connected) sensor.send(JSON.stringify('warn'))
+    subsystem.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      if (data.temperature) {
+        let temperature = data.temperature
+        if (temperature >= 35.0 && isleeping.current) wakeup(temperature);
+        if (temperature >= 38.5 && isleeping.current && socket.connected) subsystem.send(JSON.stringify('warn'))
+      } else if (data.code && scanner.current) {
+        try {
+          const qr = JSON.parse(CryptoJS.AES.decrypt(data.code, process.env.REACT_APP_TERMINAL_KEY).toString(CryptoJS.enc.Utf8))
+          if (qr.uid) socket.emit('mark', JSON.stringify({ cipher: CryptoJS.AES.encrypt(JSON.stringify({ uid: qr.uid, temperature: object.current.temperature, date: object.current.date, time: object.current.time, object: object.current.object, terminal: object.current.terminal }), process.env.REACT_APP_NETWORK_KEY).toString() }));
+        } catch { }
+      }
     };
-    sensor.onclose = () => {
+    subsystem.onclose = () => {
       try {
         socket.disconnect();
       } catch { }
@@ -72,7 +88,6 @@ function App() {
     socket.on('marked_terminal', (msg) => {
       const message = JSON.parse(CryptoJS.AES.decrypt(JSON.parse(msg).cipher, process.env.REACT_APP_NETWORK_KEY).toString(CryptoJS.enc.Utf8))
       if (message.terminal === config.name) {
-        sensor.send(JSON.stringify('camera_off'));
         // eslint-disable-next-line react-hooks/exhaustive-deps
         isleeping.current = false;
         setScreen(<Marked user={message.user} temp={message.temperature} onTimeout={set_home} />);
@@ -82,7 +97,6 @@ function App() {
     socket.on('duplicate', (msg) => {
       const message = JSON.parse(CryptoJS.AES.decrypt(JSON.parse(msg).cipher, process.env.REACT_APP_NETWORK_KEY).toString(CryptoJS.enc.Utf8));
       if (message.terminal === config.name) {
-        sensor.send(JSON.stringify('camera_off'));
         isleeping.current = false;
         setScreen(<Duplicate onTimeout={set_home} />)
       }
@@ -91,7 +105,6 @@ function App() {
     socket.on('failed', (msg) => {
       const message = JSON.parse(CryptoJS.AES.decrypt(JSON.parse(msg).cipher, process.env.REACT_APP_NETWORK_KEY).toString(CryptoJS.enc.Utf8));
       if (message.terminal === config.name) {
-        sensor.send(JSON.stringify('camera_off'));
         isleeping.current = false;
         setScreen(<Failed onTimeout={set_home} />)
       }

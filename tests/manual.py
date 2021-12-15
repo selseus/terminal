@@ -1,6 +1,8 @@
 import asyncio
 import websockets
-import json, time
+import json
+import time
+
 
 def flash(times, delay):
     for x in range(times):
@@ -9,12 +11,14 @@ def flash(times, delay):
         print("Flash")
         time.sleep(delay)
 
+
 def beep(times, delay):
     for x in range(times):
         print("Beep")
         time.sleep(delay)
         print("Beep")
         time.sleep(delay)
+
 
 async def echo(websocket, path):
     async for message in websocket:
@@ -32,15 +36,19 @@ async def echo(websocket, path):
                     except:
                         await websocket.close(1000)
                         quit()
-                    if(temperature>=38.5):
+                    await websocket.send(json.dumps({"temperature": temperature}))
+                    if(temperature >= 38.5):
                         beep(5, 0.5)
                         flash(5, 0.5)
-                    elif(temperature>=35.5):
+                    elif(temperature >= 35.5):
                         beep(2, 0.2)
                         flash(2, 0.2)
-                    await websocket.send(json.dumps({"temperature": temperature}))
-            elif(request=="warn"):
+            elif(request == "warn"):
                 beep(5, 0.5)
+            elif(request == "code"):
+                f = open('codes.txt', 'r')
+                await websocket.send(json.dumps({"code": f.read()}))
+                f.close()
         except KeyboardInterrupt:
             await websocket.close(1000)
             quit()

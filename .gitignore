@@ -16,3 +16,6 @@ yarn-error.log*
 
 src/logo.svg
 dist/
+
+# system generated codes file
+/codes.txt
