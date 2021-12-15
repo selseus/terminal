@@ -1,3 +1,9 @@
+# Script to parse QR codes from MJEPG video stream
+# The ideal was to integrate this into subsystem.py itself to save resources
+# But, for some reason, urllib request stream running alongside a websocket server isn't going well
+# In other words, I'm unable to access stream
+# Fixes welcome
+
 import cv2
 import urllib.request
 import numpy as np
